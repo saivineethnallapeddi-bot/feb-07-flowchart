@@ -1,7 +1,7 @@
 // Z.ORG - Organization Chart Management System
 // Complete React Application with Full Screen Layout and No Blue Borders
 
-// React and ReactDOM imports (for production build)
+// React imports
 import React, { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -330,7 +330,7 @@ function App() {
   );
 }
 
-// Initialize the application
+// Initialize application
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(React.createElement(App));
