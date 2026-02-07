@@ -50,25 +50,16 @@
     <script>
       // Detect environment and load appropriate script
       (function() {
-        // Check if we're in development mode (Vite dev server)
-        if (window.location.hostname === 'localhost' && (window.location.port === '5177' || window.location.port === '3000')) {
-          // Development mode - load from source
-          var script = document.createElement('script');
-          script.type = 'module';
-          script.src = '/src/main.jsx';
-          document.head.appendChild(script);
-        } else {
-          // Production mode - load from built assets
-          var script = document.createElement('script');
-          script.type = 'module';
-          script.src = './assets/script.js';
-          document.head.appendChild(script);
-          
-          var link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = './assets/style.css';
-          document.head.appendChild(link);
-        }
+        // Production mode - load from built assets (Vercel deployment)
+        var script = document.createElement('script');
+        script.type = 'module';
+        script.src = './assets/script.js';
+        document.head.appendChild(script);
+        
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = './assets/style.css';
+        document.head.appendChild(link);
       })();
     </script>
   </body>
