@@ -1,5 +1,9 @@
 // Z.ORG - Organization Chart Management System
-// Complete JavaScript Application with Full Screen Layout and No Blue Borders
+// Complete React Application with Full Screen Layout and No Blue Borders
+
+// React and ReactDOM imports (for production build)
+import React, { useState, useRef, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 
 // Organization Data
 const orgData = {
@@ -56,11 +60,6 @@ const orgData = {
     }
   ]
 };
-
-// Application State
-let currentPage = 'dashboard';
-let selectedEmployee = null;
-let searchTerm = '';
 
 // PDF Export Function
 function handleExportPDF() {
@@ -134,261 +133,204 @@ function generateHTMLContent() {
 }
 
 // Navigation Component
-function renderNavigation() {
-  return `
-    <nav class="nav-menu">
-      <div class="nav-header">
-        <div class="logo">
-          <h2>Z.ORG</h2>
-        </div>
-        <div class="nav-items">
-          <button class="nav-item ${currentPage === 'dashboard' ? 'active' : ''}" onclick="navigateTo('dashboard')">
-            Dashboard
-          </button>
-          <button class="nav-item ${currentPage === 'orgchart' ? 'active' : ''}" onclick="navigateTo('orgchart')">
-            Org Chart
-          </button>
-          <button class="nav-item ${currentPage === 'employees' ? 'active' : ''}" onclick="navigateTo('employees')">
-            Employees
-          </button>
-          <button class="nav-item ${currentPage === 'payroll' ? 'active' : ''}" onclick="navigateTo('payroll')">
-            Payroll
-          </button>
-        </div>
-      </div>
-    </nav>
-  `;
+function Navigation({ currentPage, setCurrentPage }) {
+  return React.createElement('nav', { className: 'nav-menu' },
+    React.createElement('div', { className: 'nav-header' },
+      React.createElement('div', { className: 'logo' },
+        React.createElement('h2', null, 'Z.ORG')
+      ),
+      React.createElement('div', { className: 'nav-items' },
+        React.createElement('button', { 
+          className: `nav-item ${currentPage === 'dashboard' ? 'active' : ''}`,
+          onClick: () => setCurrentPage('dashboard')
+        }, 'Dashboard'),
+        React.createElement('button', { 
+          className: `nav-item ${currentPage === 'orgchart' ? 'active' : ''}`,
+          onClick: () => setCurrentPage('orgchart')
+        }, 'Org Chart'),
+        React.createElement('button', { 
+          className: `nav-item ${currentPage === 'employees' ? 'active' : ''}`,
+          onClick: () => setCurrentPage('employees')
+        }, 'Employees'),
+        React.createElement('button', { 
+          className: `nav-item ${currentPage === 'payroll' ? 'active' : ''}`,
+          onClick: () => setCurrentPage('payroll')
+        }, 'Payroll')
+      )
+    )
+  );
 }
 
 // Header Component
-function renderHeader() {
-  return `
-    <header class="header">
-      <div class="header-left">
-        <h1>Z.ORG Management System</h1>
-      </div>
-      <div class="header-right">
-        <div class="search-container">
-          <input type="text" placeholder="Search employees..." value="${searchTerm}" onchange="updateSearch(this.value)" class="search-input">
-        </div>
-        <button onclick="handleExportPDF()" class="export-btn">
-          Export PDF
-        </button>
-      </div>
-    </header>
-  `;
+function Header({ searchTerm, setSearchTerm, onExportPDF }) {
+  return React.createElement('header', { className: 'header' },
+    React.createElement('div', { className: 'header-left' },
+      React.createElement('h1', null, 'Z.ORG Management System')
+    ),
+    React.createElement('div', { className: 'header-right' },
+      React.createElement('div', { className: 'search-container' },
+        React.createElement('input', {
+          type: 'text',
+          placeholder: 'Search employees...',
+          value: searchTerm,
+          onChange: (e) => setSearchTerm(e.target.value),
+          className: 'search-input'
+        })
+      ),
+      React.createElement('button', { onClick: onExportPDF, className: 'export-btn' },
+        'Export PDF'
+      )
+    )
+  );
 }
 
 // Dashboard Component
-function renderDashboard() {
-  return `
-    <div class="dashboard">
-      <h2>Dashboard Overview</h2>
-      <div class="dashboard-stats">
-        <div class="stat-card">
-          <h3>Total Employees</h3>
-          <p>${orgData.employees.length}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Departments</h3>
-          <p>4</p>
-        </div>
-        <div class="stat-card">
-          <h3>Active Projects</h3>
-          <p>12</p>
-        </div>
-      </div>
-    </div>
-  `;
+function Dashboard() {
+  return React.createElement('div', { className: 'dashboard' },
+    React.createElement('h2', null, 'Dashboard Overview'),
+    React.createElement('div', { className: 'dashboard-stats' },
+      React.createElement('div', { className: 'stat-card' },
+        React.createElement('h3', null, 'Total Employees'),
+        React.createElement('p', null, orgData.employees.length)
+      ),
+      React.createElement('div', { className: 'stat-card' },
+        React.createElement('h3', null, 'Departments'),
+        React.createElement('p', null, '4')
+      ),
+      React.createElement('div', { className: 'stat-card' },
+        React.createElement('h3', null, 'Active Projects'),
+        React.createElement('p', null, '12')
+      )
+    )
+  );
 }
 
 // Org Chart Component
-function renderOrgChart() {
-  return `
-    <div class="org-chart">
-      <h2>Organization Chart</h2>
-      <div class="chart-container">
-        ${orgData.employees.map(emp => `
-          <div class="org-node">
-            <div class="emp-card">
-              <img src="${emp.avatar}" alt="${emp.name}" class="emp-avatar">
-              <div class="emp-info">
-                <h4>${emp.name}</h4>
-                <p>${emp.role}</p>
-                <small>${emp.department}</small>
-              </div>
-            </div>
-            ${emp.subordinates && emp.subordinates.length > 0 ? `
-              <div class="subordinates">
-                ${emp.subordinates.map(sub => `
-                  <div class="subordinate-node">
-                    <div class="sub-card">
-                      <img src="${sub.avatar}" alt="${sub.name}" class="sub-avatar">
-                      <div class="sub-info">
-                        <h5>${sub.name}</h5>
-                        <p>${sub.role}</p>
-                      </div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
+function OrgChart() {
+  return React.createElement('div', { className: 'org-chart' },
+    React.createElement('h2', null, 'Organization Chart'),
+    React.createElement('div', { className: 'chart-container' },
+      ...orgData.employees.map(emp =>
+        React.createElement('div', { key: emp.id, className: 'org-node' },
+          React.createElement('div', { className: 'emp-card' },
+            React.createElement('img', { src: emp.avatar, alt: emp.name, className: 'emp-avatar' }),
+            React.createElement('div', { className: 'emp-info' },
+              React.createElement('h4', null, emp.name),
+              React.createElement('p', null, emp.role),
+              React.createElement('small', null, emp.department)
+            )
+          ),
+          emp.subordinates && emp.subordinates.length > 0
+            ? React.createElement('div', { className: 'subordinates' },
+                ...emp.subordinates.map(sub =>
+                  React.createElement('div', { key: sub.id, className: 'subordinate-node' },
+                    React.createElement('div', { className: 'sub-card' },
+                      React.createElement('img', { src: sub.avatar, alt: sub.name, className: 'sub-avatar' }),
+                      React.createElement('div', { className: 'sub-info' },
+                        React.createElement('h5', null, sub.name),
+                        React.createElement('p', null, sub.role)
+                      )
+                    )
+                  )
+                )
+              )
+            : null
+        )
+      )
+    )
+  );
 }
 
 // Employees List Component
-function renderEmployeesList() {
+function EmployeesList({ searchTerm }) {
   const filteredEmployees = orgData.employees.filter(emp => 
     emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.department.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  return `
-    <div class="employees-list">
-      <h2>Employees Directory</h2>
-      <div class="employees-grid">
-        ${filteredEmployees.map(emp => `
-          <div class="employee-card" onclick="showEmployeeProfile(${emp.id})">
-            <img src="${emp.avatar}" alt="${emp.name}" class="emp-photo">
-            <div class="emp-details">
-              <h4>${emp.name}</h4>
-              <p class="emp-role">${emp.role}</p>
-              <p class="emp-dept">${emp.department}</p>
-              <p class="emp-email">${emp.email}</p>
-              <p class="emp-phone">${emp.phone}</p>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
+  return React.createElement('div', { className: 'employees-list' },
+    React.createElement('h2', null, 'Employees Directory'),
+    React.createElement('div', { className: 'employees-grid' },
+      ...filteredEmployees.map(emp =>
+        React.createElement('div', { key: emp.id, className: 'employee-card' },
+          React.createElement('img', { src: emp.avatar, alt: emp.name, className: 'emp-photo' }),
+          React.createElement('div', { className: 'emp-details' },
+            React.createElement('h4', null, emp.name),
+            React.createElement('p', { className: 'emp-role' }, emp.role),
+            React.createElement('p', { className: 'emp-dept' }, emp.department),
+            React.createElement('p', { className: 'emp-email' }, emp.email),
+            React.createElement('p', { className: 'emp-phone' }, emp.phone)
+          )
+        )
+      )
+    )
+  );
 }
 
 // Payroll Component
-function renderPayroll() {
-  return `
-    <div class="payroll">
-      <h2>Payroll Management</h2>
-      <div class="payroll-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Department</th>
-              <th>Salary</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${orgData.employees.map(emp => `
-              <tr>
-                <td>${emp.name}</td>
-                <td>${emp.department}</td>
-                <td>$75,000</td>
-                <td class="status-active">Active</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
+function Payroll() {
+  return React.createElement('div', { className: 'payroll' },
+    React.createElement('h2', null, 'Payroll Management'),
+    React.createElement('div', { className: 'payroll-table' },
+      React.createElement('table', null,
+        React.createElement('thead', null,
+          React.createElement('tr', null,
+            React.createElement('th', null, 'Employee'),
+            React.createElement('th', null, 'Department'),
+            React.createElement('th', null, 'Salary'),
+            React.createElement('th', null, 'Status')
+          )
+        ),
+        React.createElement('tbody', null,
+          ...orgData.employees.map(emp =>
+            React.createElement('tr', { key: emp.id },
+              React.createElement('td', null, emp.name),
+              React.createElement('td', null, emp.department),
+              React.createElement('td', null, '$75,000'),
+              React.createElement('td', { className: 'status-active' }, 'Active')
+            )
+          )
+        )
+      )
+    )
+  );
 }
 
-// Employee Profile Modal
-function renderEmployeeProfile() {
-  if (!selectedEmployee) return '';
-  
-  return `
-    <div class="profile-overlay" onclick="closeEmployeeProfile()">
-      <div class="profile-panel" onclick="event.stopPropagation()">
-        <div class="profile-header">
-          <img src="${selectedEmployee.avatar}" alt="${selectedEmployee.name}" class="profile-avatar">
-          <div class="profile-info">
-            <h3>${selectedEmployee.name}</h3>
-            <p>${selectedEmployee.role}</p>
-            <p>${selectedEmployee.department}</p>
-          </div>
-          <button class="close-btn" onclick="closeEmployeeProfile()">×</button>
-        </div>
-        <div class="profile-details">
-          <div class="detail-section">
-            <h4>Contact Information</h4>
-            <p><strong>Email:</strong> ${selectedEmployee.email}</p>
-            <p><strong>Phone:</strong> ${selectedEmployee.phone}</p>
-          </div>
-          <div class="detail-section">
-            <h4>Employment Details</h4>
-            <p><strong>Employee ID:</strong> ${selectedEmployee.id}</p>
-            <p><strong>Department:</strong> ${selectedEmployee.department}</p>
-            <p><strong>Role:</strong> ${selectedEmployee.role}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
+// Main App Component
+function App() {
+  const [currentPage, setCurrentPage] = React.useState('dashboard');
+  const [searchTerm, setSearchTerm] = React.useState('');
 
-// Navigation Functions
-function navigateTo(page) {
-  currentPage = page;
-  renderApp();
-}
+  const renderMainContent = () => {
+    switch (currentPage) {
+      case 'dashboard':
+        return React.createElement(Dashboard);
+      case 'orgchart':
+        return React.createElement(OrgChart);
+      case 'employees':
+        return React.createElement(EmployeesList, { searchTerm });
+      case 'payroll':
+        return React.createElement(Payroll);
+      default:
+        return React.createElement(Dashboard);
+    }
+  };
 
-function updateSearch(value) {
-  searchTerm = value;
-  if (currentPage === 'employees') {
-    renderApp();
-  }
-}
-
-function showEmployeeProfile(employeeId) {
-  selectedEmployee = orgData.employees.find(emp => emp.id === employeeId);
-  renderApp();
-}
-
-function closeEmployeeProfile() {
-  selectedEmployee = null;
-  renderApp();
-}
-
-// Main Content Area
-function renderMainContent() {
-  switch (currentPage) {
-    case 'dashboard':
-      return renderDashboard();
-    case 'orgchart':
-      return renderOrgChart();
-    case 'employees':
-      return renderEmployeesList();
-    case 'payroll':
-      return renderPayroll();
-    default:
-      return renderDashboard();
-  }
-}
-
-// Main App Render Function
-function renderApp() {
-  const app = document.getElementById('root');
-  app.innerHTML = `
-    <div class="app">
-      ${renderNavigation()}
-      <div class="content-area">
-        ${renderHeader()}
-        ${renderMainContent()}
-      </div>
-      ${renderEmployeeProfile()}
-    </div>
-  `;
+  return React.createElement('div', { className: 'app' },
+    React.createElement(Navigation, { currentPage, setCurrentPage }),
+    React.createElement('div', { className: 'content-area' },
+      React.createElement(Header, { 
+        searchTerm, 
+        setSearchTerm, 
+        onExportPDF: handleExportPDF 
+      }),
+      renderMainContent()
+    )
+  );
 }
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-  renderApp();
-});
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(React.createElement(App));
